@@ -42,9 +42,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: pip install -e ".[dev]"
+      - run: pip install -e ".[dev]" mypy
       - name: Type check
-        run: mypy src/api
+        run: mypy src/cartsnitch_api
 
   test:
     runs-on: local-ubuntu-latest
@@ -72,9 +72,9 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql://cartsnitch:cartsnitch_test@localhost:5432/cartsnitch_test
-      REDIS_URL: redis://localhost:6379/0
-      JWT_SECRET: test-secret-do-not-use-in-prod
+      CARTSNITCH_DATABASE_URL: postgresql+asyncpg://cartsnitch:cartsnitch_test@localhost:5432/cartsnitch_test
+      CARTSNITCH_REDIS_URL: redis://localhost:6379/0
+      CARTSNITCH_JWT_SECRET_KEY: test-secret-do-not-use-in-prod
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
