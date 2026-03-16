@@ -2,7 +2,7 @@
 
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from cartsnitch_api.auth.jwt import decode_token
@@ -31,7 +31,7 @@ async def get_current_user(
     return UUID(payload["sub"])
 
 
-async def verify_service_key(x_service_key: str) -> None:
+async def verify_service_key(x_service_key: str = Header()) -> None:
     if x_service_key != settings.service_key:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
