@@ -3,20 +3,40 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from httpx import HTTPStatusError
 
 from cartsnitch_api.auth.dependencies import get_current_user
 from cartsnitch_api.schemas import SyncStatusResponse, SyncTriggerResponse
+from cartsnitch_api.services.receiptwitness import ReceiptWitnessClient
 
 router = APIRouter(prefix="/scraping", tags=["scraping"])
 
 
 @router.post("/{store_slug}/sync", response_model=SyncTriggerResponse)
 async def trigger_sync(store_slug: str, user_id: UUID = Depends(get_current_user)):
-    # TODO: call service layer — proxy to ReceiptWitness
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+    client = ReceiptWitnessClient()
+    try:
+        result = await client.trigger_sync(str(user_id), store_slug)
+        return result
+    except HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail="Sync service error",
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Unable to reach sync service",
+        )
 
 
 @router.get("/status", response_model=list[SyncStatusResponse])
 async def sync_status(user_id: UUID = Depends(get_current_user)):
-    # TODO: call service layer — sync status across all stores
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+    client = ReceiptWitnessClient()
+    try:
+        return await client.get_sync_status(str(user_id))
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Unable to reach sync service",
+        )

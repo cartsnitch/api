@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = 7
 
     service_key: str = "change-me-in-production"
+    fernet_key: str = "change-me-in-production-generate-with-Fernet.generate_key"
 
     cors_origins: list[str] = ["http://localhost:3000", "https://cartsnitch.com"]
 

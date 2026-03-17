@@ -3,9 +3,12 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from cartsnitch_api.auth.dependencies import get_current_user
+from cartsnitch_api.database import get_db
 from cartsnitch_api.schemas import PriceTrendResponse, ProductDetailResponse, ProductResponse
+from cartsnitch_api.services.products import ProductService
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -17,18 +20,33 @@ async def list_products(
     category: str | None = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
 ):
-    # TODO: call service layer — product search/list
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+    svc = ProductService(db)
+    return await svc.list_products(q, category, page, page_size)
 
 
 @router.get("/{product_id}", response_model=ProductDetailResponse)
-async def get_product(product_id: UUID, user_id: UUID = Depends(get_current_user)):
-    # TODO: call service layer — product detail with cross-store prices
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+async def get_product(
+    product_id: UUID,
+    user_id: UUID = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    svc = ProductService(db)
+    try:
+        return await svc.get_product(product_id)
+    except LookupError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
 
 @router.get("/{product_id}/prices", response_model=PriceTrendResponse)
-async def get_product_prices(product_id: UUID, user_id: UUID = Depends(get_current_user)):
-    # TODO: call service layer — price history across stores
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+async def get_product_prices(
+    product_id: UUID,
+    user_id: UUID = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    svc = ProductService(db)
+    try:
+        return await svc.get_price_history(product_id)
+    except LookupError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")

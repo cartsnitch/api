@@ -30,6 +30,11 @@ class TokenResponse(BaseModel):
     expires_in: int
 
 
+class UpdateUserRequest(BaseModel):
+    email: EmailStr | None = None
+    display_name: str | None = Field(None, min_length=1, max_length=100)
+
+
 class UserResponse(BaseModel):
     id: UUID
     email: str

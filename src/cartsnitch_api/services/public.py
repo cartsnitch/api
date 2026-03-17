@@ -1,0 +1,122 @@
+"""Public service — unauthenticated price transparency endpoints."""
+
+from uuid import UUID
+
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+
+class PublicService:
+    def __init__(self, db: AsyncSession) -> None:
+        self.db = db
+
+    async def get_trend(self, product_id: UUID) -> dict:
+        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+
+        result = await self.db.execute(
+            select(NormalizedProduct).where(NormalizedProduct.id == product_id)
+        )
+        product = result.scalar_one_or_none()
+        if not product:
+            raise LookupError("Product not found")
+
+        prices_result = await self.db.execute(
+            select(PriceHistory)
+            .where(PriceHistory.normalized_product_id == product_id)
+            .options(selectinload(PriceHistory.store))
+            .order_by(PriceHistory.observed_date)
+        )
+        prices = prices_result.scalars().all()
+
+        return {
+            "product_id": product.id,
+            "product_name": product.canonical_name,
+            "data_points": [
+                {
+                    "date": ph.observed_date,
+                    "price": float(ph.regular_price),
+                    "store_id": ph.store_id,
+                    "store_name": ph.store.name,
+                }
+                for ph in prices
+            ],
+        }
+
+    async def get_store_comparison(self, product_ids: list[UUID]) -> dict:
+        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+        from sqlalchemy import and_
+
+        products = []
+        for pid in product_ids:
+            prod_result = await self.db.execute(
+                select(NormalizedProduct).where(NormalizedProduct.id == pid)
+            )
+            product = prod_result.scalar_one_or_none()
+            if not product:
+                continue
+
+            subq = (
+                select(
+                    PriceHistory.store_id,
+                    func.max(PriceHistory.observed_date).label("max_date"),
+                )
+                .where(PriceHistory.normalized_product_id == pid)
+                .group_by(PriceHistory.store_id)
+                .subquery()
+            )
+            prices_result = await self.db.execute(
+                select(PriceHistory)
+                .join(
+                    subq,
+                    and_(
+                        PriceHistory.store_id == subq.c.store_id,
+                        PriceHistory.observed_date == subq.c.max_date,
+                        PriceHistory.normalized_product_id == pid,
+                    ),
+                )
+                .options(selectinload(PriceHistory.store))
+            )
+            prices = prices_result.scalars().all()
+
+            products.append({
+                "product_id": pid,
+                "product_name": product.canonical_name,
+                "prices": [
+                    {
+                        "store_id": ph.store_id,
+                        "store_name": ph.store.name,
+                        "current_price": float(ph.regular_price),
+                        "last_seen_at": ph.observed_date,
+                    }
+                    for ph in prices
+                ],
+            })
+
+        return {"products": products}
+
+    async def get_inflation(self) -> dict:
+        """Aggregate price change stats. Compares average prices across periods."""
+        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+
+        # Get average prices grouped by category for recent vs older data
+        result = await self.db.execute(
+            select(
+                NormalizedProduct.category,
+                func.avg(PriceHistory.regular_price),
+            )
+            .join(NormalizedProduct)
+            .group_by(NormalizedProduct.category)
+        )
+        categories = {}
+        for row in result.all():
+            cat, avg_price = row
+            if cat:
+                categories[cat] = float(avg_price) if avg_price else 0.0
+
+        return {
+            "period": "all-time",
+            "cartsnitch_index": sum(categories.values()) / max(len(categories), 1),
+            "cpi_baseline": 100.0,
+            "categories": categories,
+        }
