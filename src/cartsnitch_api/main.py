@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from cartsnitch_api.auth.routes import router as auth_router
 from cartsnitch_api.middleware.cors import add_cors_middleware
+from cartsnitch_api.middleware.error_handler import add_error_handlers, add_error_monitor_middleware
 from cartsnitch_api.middleware.rate_limit import add_rate_limit_middleware
 from cartsnitch_api.routes.alerts import router as alerts_router
 from cartsnitch_api.routes.coupons import router as coupons_router
@@ -34,9 +35,15 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Middleware (order matters — outermost first)
     add_cors_middleware(app)
+    add_error_monitor_middleware(app)
     add_rate_limit_middleware(app)
 
+    # Exception handlers
+    add_error_handlers(app)
+
+    # Routers
     app.include_router(health_router)
     app.include_router(auth_router)
     app.include_router(stores_router)
