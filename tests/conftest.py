@@ -1,15 +1,33 @@
 """Shared test fixtures with in-memory SQLite database."""
 
 import pytest
-from cartsnitch_common.models import Base
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import event
+from sqlalchemy import create_engine, event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 from cartsnitch_api.database import get_db
 from cartsnitch_api.main import create_app
+from cartsnitch_api.models import Base
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+
+@pytest.fixture
+def engine():
+    """Sync in-memory SQLite engine for model unit tests."""
+    eng = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(eng)
+    yield eng
+    eng.dispose()
+
+
+@pytest.fixture
+def session(engine):
+    """Sync SQLAlchemy session for model unit tests."""
+    factory = sessionmaker(bind=engine)
+    with factory() as sess:
+        yield sess
 
 
 @pytest.fixture

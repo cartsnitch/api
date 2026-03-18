@@ -14,7 +14,7 @@ class PriceService:
         self.db = db
 
     async def get_trends(self, category: str | None = None) -> list[dict]:
-        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+        from cartsnitch_api.models import NormalizedProduct, PriceHistory
 
         query = (
             select(PriceHistory)
@@ -57,7 +57,7 @@ class PriceService:
         Uses a window function (lag) to compare each price observation with the
         previous one per product+store, avoiding the N+1 query pattern.
         """
-        from cartsnitch_common.models import NormalizedProduct, PriceHistory, Store
+        from cartsnitch_api.models import NormalizedProduct, PriceHistory, Store
 
         # Use lag() window function to get previous price in a single query
         prev_price = (
@@ -127,7 +127,7 @@ class PriceService:
         return increases
 
     async def get_comparison(self, product_ids: list[UUID]) -> list[dict]:
-        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+        from cartsnitch_api.models import NormalizedProduct, PriceHistory
 
         if not product_ids:
             return []

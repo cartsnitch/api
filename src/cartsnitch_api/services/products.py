@@ -20,7 +20,7 @@ class ProductService:
         page: int = 1,
         page_size: int = 20,
     ) -> list[dict]:
-        from cartsnitch_common.models import NormalizedProduct
+        from cartsnitch_api.models import NormalizedProduct
 
         query = select(NormalizedProduct)
         if q:
@@ -47,7 +47,7 @@ class ProductService:
         ]
 
     async def get_product(self, product_id: UUID) -> dict:
-        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+        from cartsnitch_api.models import NormalizedProduct, PriceHistory
 
         result = await self.db.execute(
             select(NormalizedProduct).where(NormalizedProduct.id == product_id)
@@ -92,7 +92,7 @@ class ProductService:
         }
 
     async def get_price_history(self, product_id: UUID) -> dict:
-        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+        from cartsnitch_api.models import NormalizedProduct, PriceHistory
 
         result = await self.db.execute(
             select(NormalizedProduct).where(NormalizedProduct.id == product_id)

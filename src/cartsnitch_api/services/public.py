@@ -14,7 +14,7 @@ class PublicService:
         self.db = db
 
     async def get_trend(self, product_id: UUID) -> dict:
-        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+        from cartsnitch_api.models import NormalizedProduct, PriceHistory
 
         result = await self.db.execute(
             select(NormalizedProduct).where(NormalizedProduct.id == product_id)
@@ -46,7 +46,7 @@ class PublicService:
         }
 
     async def get_store_comparison(self, product_ids: list[UUID]) -> dict:
-        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+        from cartsnitch_api.models import NormalizedProduct, PriceHistory
 
         if not product_ids:
             return {"products": []}
@@ -104,7 +104,7 @@ class PublicService:
 
     async def get_inflation(self) -> dict:
         """Aggregate price change stats. Compares average prices across periods."""
-        from cartsnitch_common.models import NormalizedProduct, PriceHistory
+        from cartsnitch_api.models import NormalizedProduct, PriceHistory
 
         # Get average prices grouped by category for recent vs older data
         result = await self.db.execute(

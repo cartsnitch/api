@@ -5,8 +5,9 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from cartsnitch_common.models import NormalizedProduct, PriceHistory, Store
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from cartsnitch_api.models import NormalizedProduct, PriceHistory, Store
 
 
 @pytest.fixture
