@@ -42,6 +42,16 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: 3101967
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: common
+          owner: cartsnitch
+      - name: Install cartsnitch-common from GitHub
+        run: pip install "cartsnitch-common @ git+https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/cartsnitch/common.git"
       - run: pip install -e ".[dev]" mypy
       - name: Type check
         run: mypy src/cartsnitch_api
@@ -81,6 +91,16 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: 3101967
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: common
+          owner: cartsnitch
+      - name: Install cartsnitch-common from GitHub
+        run: pip install "cartsnitch-common @ git+https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/cartsnitch/common.git"
       - run: pip install -e ".[dev]"
       - name: Run tests
         run: pytest --tb=short -q
