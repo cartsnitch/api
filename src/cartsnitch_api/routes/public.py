@@ -29,9 +29,14 @@ async def public_price_trend(product_id: UUID, db: AsyncSession = Depends(get_db
 
 @router.get("/store-comparison", response_model=PublicStoreComparisonResponse)
 async def public_store_comparison(
-    product_ids: list[UUID] = Query(...),
+    product_ids: list[UUID] = Query(..., max_length=20),
     db: AsyncSession = Depends(get_db),
 ):
+    if not product_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one product_id is required",
+        )
     svc = PublicService(db)
     return await svc.get_store_comparison(product_ids)
 
