@@ -60,10 +60,7 @@ jobs:
     runs-on: local-ubuntu-latest-cartsnitch
     services:
       postgres:
-        image: ghcr.io/cartsnitch/mirror/postgres:15-alpine
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        image: postgres:15-alpine
         env:
           POSTGRES_USER: cartsnitch
           POSTGRES_PASSWORD: cartsnitch_test
@@ -76,10 +73,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       redis:
-        image: ghcr.io/cartsnitch/mirror/redis:7-alpine
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        image: redis:7-alpine
         ports:
           - 6379:6379
         options: >-
