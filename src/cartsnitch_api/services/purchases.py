@@ -18,12 +18,23 @@ class PurchaseService:
         page: int = 1,
         page_size: int = 20,
     ) -> list[dict]:
-        from cartsnitch_common.models import Purchase, PurchaseItem
+        from cartsnitch_common.models import Purchase, PurchaseItem, Store
+
+        # Count items per purchase in a single subquery instead of N+1
+        item_counts = (
+            select(
+                PurchaseItem.purchase_id,
+                func.count().label("item_count"),
+            )
+            .group_by(PurchaseItem.purchase_id)
+            .subquery()
+        )
 
         query = (
-            select(Purchase)
+            select(Purchase, item_counts.c.item_count, Store.name.label("store_name"))
+            .join(Store, Store.id == Purchase.store_id)
+            .outerjoin(item_counts, item_counts.c.purchase_id == Purchase.id)
             .where(Purchase.user_id == user_id)
-            .options(selectinload(Purchase.store))
         )
         if store_id:
             query = query.where(Purchase.store_id == store_id)
@@ -32,23 +43,18 @@ class PurchaseService:
         query = query.offset((page - 1) * page_size).limit(page_size)
 
         result = await self.db.execute(query)
-        purchases = result.scalars().all()
 
-        out = []
-        for p in purchases:
-            item_count_result = await self.db.execute(
-                select(func.count()).where(PurchaseItem.purchase_id == p.id)
-            )
-            item_count = item_count_result.scalar()
-            out.append({
+        return [
+            {
                 "id": p.id,
                 "store_id": p.store_id,
-                "store_name": p.store.name,
+                "store_name": store_name,
                 "purchased_at": p.purchase_date,
                 "total": float(p.total),
-                "item_count": item_count,
-            })
-        return out
+                "item_count": item_count or 0,
+            }
+            for p, item_count, store_name in result.all()
+        ]
 
     async def get_purchase(self, purchase_id: UUID, user_id: UUID) -> dict:
         from cartsnitch_common.models import Purchase

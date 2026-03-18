@@ -3,7 +3,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, RequestError
 
 from cartsnitch_api.auth.dependencies import get_current_user
 from cartsnitch_api.schemas import OptimizeRequest, OptimizeResponse, ShoppingListResponse
@@ -27,7 +27,7 @@ async def optimize_shopping(body: OptimizeRequest, user_id: UUID = Depends(get_c
             status_code=e.response.status_code,
             detail="Shopping optimization service error",
         )
-    except Exception:
+    except RequestError:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Unable to reach shopping optimization service",
@@ -39,7 +39,7 @@ async def list_shopping_lists(user_id: UUID = Depends(get_current_user)):
     client = ClipArtistClient()
     try:
         return await client.get_shopping_lists(str(user_id))
-    except Exception:
+    except (HTTPStatusError, RequestError):
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Unable to reach shopping service",

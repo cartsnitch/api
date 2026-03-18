@@ -139,3 +139,25 @@ async def test_delete_me(client, auth_headers):
     # Verify user is gone (token still valid but user deleted)
     resp = await client.get("/auth/me", headers=auth_headers)
     assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_refresh_after_delete_fails(client):
+    """Refresh token for a deleted user must be rejected."""
+    reg = await client.post("/auth/register", json={
+        "email": "ghost@example.com",
+        "password": "securepass123",
+        "display_name": "Ghost User",
+    })
+    tokens = reg.json()
+    headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+
+    # Delete the user
+    resp = await client.delete("/auth/me", headers=headers)
+    assert resp.status_code == 204
+
+    # Refresh token should now fail
+    resp = await client.post("/auth/refresh", json={
+        "refresh_token": tokens["refresh_token"],
+    })
+    assert resp.status_code == 401

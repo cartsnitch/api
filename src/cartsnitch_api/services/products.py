@@ -2,9 +2,11 @@
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
+from cartsnitch_api.services.queries import latest_price_per_store
 
 
 class ProductService:
@@ -22,7 +24,9 @@ class ProductService:
 
         query = select(NormalizedProduct)
         if q:
-            query = query.where(NormalizedProduct.canonical_name.ilike(f"%{q}%"))
+            # Escape SQL LIKE wildcards in user input
+            safe_q = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            query = query.where(NormalizedProduct.canonical_name.ilike(f"%{safe_q}%"))
         if category:
             query = query.where(NormalizedProduct.category == category)
         query = query.order_by(NormalizedProduct.canonical_name)
@@ -53,17 +57,7 @@ class ProductService:
             raise LookupError("Product not found")
 
         # Get latest price per store
-        from sqlalchemy import and_, func
-
-        subq = (
-            select(
-                PriceHistory.store_id,
-                func.max(PriceHistory.observed_date).label("max_date"),
-            )
-            .where(PriceHistory.normalized_product_id == product_id)
-            .group_by(PriceHistory.store_id)
-            .subquery()
-        )
+        subq = latest_price_per_store([product_id])
         prices_result = await self.db.execute(
             select(PriceHistory)
             .join(
@@ -71,9 +65,10 @@ class ProductService:
                 and_(
                     PriceHistory.store_id == subq.c.store_id,
                     PriceHistory.observed_date == subq.c.max_date,
-                    PriceHistory.normalized_product_id == product_id,
+                    PriceHistory.normalized_product_id == subq.c.normalized_product_id,
                 ),
             )
+            .where(PriceHistory.normalized_product_id == product_id)
             .options(selectinload(PriceHistory.store))
         )
         prices = prices_result.scalars().all()

@@ -2,9 +2,11 @@
 
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
+from cartsnitch_api.services.queries import latest_price_per_store
 
 
 class PublicService:
@@ -45,40 +47,43 @@ class PublicService:
 
     async def get_store_comparison(self, product_ids: list[UUID]) -> dict:
         from cartsnitch_common.models import NormalizedProduct, PriceHistory
-        from sqlalchemy import and_
+
+        if not product_ids:
+            return {"products": []}
+
+        # Fetch all products in one query
+        prod_result = await self.db.execute(
+            select(NormalizedProduct).where(NormalizedProduct.id.in_(product_ids))
+        )
+        products_by_id = {p.id: p for p in prod_result.scalars().all()}
+
+        # Latest prices for all requested products in one query
+        subq = latest_price_per_store(product_ids)
+        prices_result = await self.db.execute(
+            select(PriceHistory)
+            .join(
+                subq,
+                and_(
+                    PriceHistory.store_id == subq.c.store_id,
+                    PriceHistory.observed_date == subq.c.max_date,
+                    PriceHistory.normalized_product_id == subq.c.normalized_product_id,
+                ),
+            )
+            .where(PriceHistory.normalized_product_id.in_(product_ids))
+            .options(selectinload(PriceHistory.store))
+        )
+        all_prices = prices_result.scalars().all()
+
+        # Group by product
+        prices_by_product: dict[UUID, list] = {}
+        for ph in all_prices:
+            prices_by_product.setdefault(ph.normalized_product_id, []).append(ph)
 
         products = []
         for pid in product_ids:
-            prod_result = await self.db.execute(
-                select(NormalizedProduct).where(NormalizedProduct.id == pid)
-            )
-            product = prod_result.scalar_one_or_none()
+            product = products_by_id.get(pid)
             if not product:
                 continue
-
-            subq = (
-                select(
-                    PriceHistory.store_id,
-                    func.max(PriceHistory.observed_date).label("max_date"),
-                )
-                .where(PriceHistory.normalized_product_id == pid)
-                .group_by(PriceHistory.store_id)
-                .subquery()
-            )
-            prices_result = await self.db.execute(
-                select(PriceHistory)
-                .join(
-                    subq,
-                    and_(
-                        PriceHistory.store_id == subq.c.store_id,
-                        PriceHistory.observed_date == subq.c.max_date,
-                        PriceHistory.normalized_product_id == pid,
-                    ),
-                )
-                .options(selectinload(PriceHistory.store))
-            )
-            prices = prices_result.scalars().all()
-
             products.append({
                 "product_id": pid,
                 "product_name": product.canonical_name,
@@ -89,7 +94,7 @@ class PublicService:
                         "current_price": float(ph.regular_price),
                         "last_seen_at": ph.observed_date,
                     }
-                    for ph in prices
+                    for ph in prices_by_product.get(pid, [])
                 ],
             })
 

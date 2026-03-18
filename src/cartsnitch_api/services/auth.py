@@ -43,6 +43,8 @@ class AuthService:
         return self._make_token_response(user.id)
 
     async def refresh(self, refresh_token: str) -> dict:
+        from cartsnitch_common.models import User
+
         try:
             payload = decode_token(refresh_token)
         except ValueError:
@@ -52,6 +54,12 @@ class AuthService:
             raise ValueError("Invalid token type")
 
         user_id = UUID(payload["sub"])
+
+        # Verify the user still exists before issuing new tokens
+        result = await self.db.execute(select(User).where(User.id == user_id))
+        if not result.scalar_one_or_none():
+            raise ValueError("User no longer exists")
+
         return self._make_token_response(user_id)
 
     async def get_user(self, user_id: UUID) -> dict:

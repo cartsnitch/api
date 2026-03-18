@@ -1,3 +1,6 @@
+import base64
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -13,7 +16,8 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = 7
 
     service_key: str = "change-me-in-production"
-    fernet_key: str = "change-me-in-production-generate-with-Fernet.generate_key"
+    # Valid Fernet key for local dev — MUST be overridden in production
+    fernet_key: str = "7reF42nmTwbdN21PBoubGp7h_FU8qSimstmlaMLoRK8="
 
     cors_origins: list[str] = ["http://localhost:3000", "https://cartsnitch.com"]
 
@@ -24,6 +28,21 @@ class Settings(BaseSettings):
 
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60
+
+    @model_validator(mode="after")
+    def validate_fernet_key(self):
+        """Validate fernet_key is a valid 32-byte url-safe base64 key at startup."""
+        try:
+            decoded = base64.urlsafe_b64decode(self.fernet_key.encode())
+            if len(decoded) != 32:
+                raise ValueError
+        except Exception:
+            raise ValueError(
+                "CARTSNITCH_FERNET_KEY must be a valid Fernet key "
+                "(32 bytes, url-safe base64 encoded). "
+                "Generate one with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+            )
+        return self
 
 
 settings = Settings()

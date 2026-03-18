@@ -3,7 +3,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, RequestError
 
 from cartsnitch_api.auth.dependencies import get_current_user
 from cartsnitch_api.schemas import SyncStatusResponse, SyncTriggerResponse
@@ -23,7 +23,7 @@ async def trigger_sync(store_slug: str, user_id: UUID = Depends(get_current_user
             status_code=e.response.status_code,
             detail="Sync service error",
         )
-    except Exception:
+    except RequestError:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Unable to reach sync service",
@@ -35,7 +35,7 @@ async def sync_status(user_id: UUID = Depends(get_current_user)):
     client = ReceiptWitnessClient()
     try:
         return await client.get_sync_status(str(user_id))
-    except Exception:
+    except (HTTPStatusError, RequestError):
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Unable to reach sync service",
