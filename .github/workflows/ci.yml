@@ -62,6 +62,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        credentials:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       redis:
         image: redis:7-alpine
         ports:
@@ -71,6 +74,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        credentials:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
     env:
       CARTSNITCH_DATABASE_URL: postgresql+asyncpg://cartsnitch:cartsnitch_test@localhost:5432/cartsnitch_test
       CARTSNITCH_REDIS_URL: redis://localhost:6379/0
