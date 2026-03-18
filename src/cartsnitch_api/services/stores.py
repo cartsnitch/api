@@ -60,9 +60,7 @@ class StoreService:
             for a in accounts
         ]
 
-    async def connect_store(
-        self, user_id: UUID, store_slug: str, credentials: dict | None
-    ) -> dict:
+    async def connect_store(self, user_id: UUID, store_slug: str, credentials: dict | None) -> dict:
         from cartsnitch_common.models import Store, UserStoreAccount
 
         result = await self.db.execute(select(Store).where(Store.slug == store_slug))
@@ -82,7 +80,9 @@ class StoreService:
         encrypted_data = None
         if credentials:
             fernet = _get_fernet()
-            encrypted_data = {"encrypted": fernet.encrypt(json.dumps(credentials).encode()).decode()}
+            encrypted_data = {
+                "encrypted": fernet.encrypt(json.dumps(credentials).encode()).decode()
+            }
 
         account = UserStoreAccount(
             user_id=user_id,

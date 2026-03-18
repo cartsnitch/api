@@ -18,9 +18,7 @@ class CouponService:
         today = date.today()
         query = (
             select(Coupon)
-            .where(
-                (Coupon.valid_to >= today) | (Coupon.valid_to.is_(None))
-            )
+            .where((Coupon.valid_to >= today) | (Coupon.valid_to.is_(None)))
             .options(selectinload(Coupon.store))
             .order_by(Coupon.valid_to.asc().nullslast())
         )

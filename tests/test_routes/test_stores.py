@@ -1,8 +1,6 @@
 """Integration tests for store endpoints."""
 
 import pytest
-from sqlalchemy import select
-
 from cartsnitch_common.models import Store
 
 

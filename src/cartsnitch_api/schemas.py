@@ -5,8 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
-
 # ---------- Auth ----------
+
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -44,6 +44,7 @@ class UserResponse(BaseModel):
 
 # ---------- Stores ----------
 
+
 class StoreResponse(BaseModel):
     id: UUID
     name: str
@@ -64,6 +65,7 @@ class ConnectStoreRequest(BaseModel):
 
 
 # ---------- Purchases ----------
+
 
 class LineItemResponse(BaseModel):
     id: UUID
@@ -96,6 +98,7 @@ class PurchaseStatsResponse(BaseModel):
 
 # ---------- Products ----------
 
+
 class ProductResponse(BaseModel):
     id: UUID
     name: str
@@ -117,6 +120,7 @@ class StorePriceResponse(BaseModel):
 
 
 # ---------- Prices ----------
+
 
 class PriceTrendResponse(BaseModel):
     product_id: UUID
@@ -149,6 +153,7 @@ class PriceComparisonResponse(BaseModel):
 
 # ---------- Coupons ----------
 
+
 class CouponResponse(BaseModel):
     id: UUID
     store_id: UUID
@@ -161,6 +166,7 @@ class CouponResponse(BaseModel):
 
 
 # ---------- Shopping ----------
+
 
 class ShoppingListItemRequest(BaseModel):
     product_id: UUID | None = None
@@ -204,6 +210,7 @@ class ShoppingListResponse(BaseModel):
 
 # ---------- Alerts ----------
 
+
 class AlertResponse(BaseModel):
     id: UUID
     alert_type: str
@@ -228,6 +235,7 @@ class AlertSettingsResponse(BaseModel):
 
 # ---------- Scraping ----------
 
+
 class SyncTriggerResponse(BaseModel):
     job_id: UUID
     status: str
@@ -242,6 +250,7 @@ class SyncStatusResponse(BaseModel):
 
 
 # ---------- Public ----------
+
 
 class PublicTrendResponse(BaseModel):
     product_id: UUID
@@ -261,6 +270,7 @@ class PublicInflationResponse(BaseModel):
 
 
 # ---------- Common ----------
+
 
 class PaginatedResponse(BaseModel):
     items: list

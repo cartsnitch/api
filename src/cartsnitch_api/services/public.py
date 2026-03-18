@@ -84,19 +84,21 @@ class PublicService:
             product = products_by_id.get(pid)
             if not product:
                 continue
-            products.append({
-                "product_id": pid,
-                "product_name": product.canonical_name,
-                "prices": [
-                    {
-                        "store_id": ph.store_id,
-                        "store_name": ph.store.name,
-                        "current_price": float(ph.regular_price),
-                        "last_seen_at": ph.observed_date,
-                    }
-                    for ph in prices_by_product.get(pid, [])
-                ],
-            })
+            products.append(
+                {
+                    "product_id": pid,
+                    "product_name": product.canonical_name,
+                    "prices": [
+                        {
+                            "store_id": ph.store_id,
+                            "store_name": ph.store.name,
+                            "current_price": float(ph.regular_price),
+                            "last_seen_at": ph.observed_date,
+                        }
+                        for ph in prices_by_product.get(pid, [])
+                    ],
+                }
+            )
 
         return {"products": products}
 

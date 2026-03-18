@@ -22,7 +22,9 @@ async def public_price_trend(product_id: UUID, db: AsyncSession = Depends(get_db
     try:
         return await svc.get_trend(product_id)
     except LookupError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+        ) from None
 
 
 @router.get("/store-comparison", response_model=PublicStoreComparisonResponse)

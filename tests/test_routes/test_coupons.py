@@ -4,9 +4,8 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
 from cartsnitch_common.models import Coupon, Store
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
 @pytest.fixture
@@ -45,9 +44,7 @@ async def test_list_coupons(client, coupon_data):
 @pytest.mark.asyncio
 async def test_list_coupons_by_store(client, coupon_data):
     store_id = str(coupon_data["store"].id)
-    resp = await client.get(
-        f"/coupons?store_id={store_id}", headers=coupon_data["headers"]
-    )
+    resp = await client.get(f"/coupons?store_id={store_id}", headers=coupon_data["headers"])
     assert resp.status_code == 200
     assert len(resp.json()) >= 1
 

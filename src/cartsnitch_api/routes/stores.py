@@ -43,9 +43,9 @@ async def connect_store(
     try:
         return await svc.connect_store(user_id, store_slug, body.credentials)
     except LookupError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
 @router.delete("/me/stores/{store_slug}", status_code=status.HTTP_204_NO_CONTENT)
@@ -58,4 +58,4 @@ async def disconnect_store(
     try:
         await svc.disconnect_store(user_id, store_slug)
     except LookupError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e

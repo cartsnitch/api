@@ -42,3 +42,7 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/cartsnitch_api/**/routes*.py" = ["B008"]
+"src/cartsnitch_api/**/dependencies.py" = ["B008"]

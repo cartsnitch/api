@@ -44,4 +44,6 @@ async def get_purchase(
     try:
         return await svc.get_purchase(purchase_id, user_id)
     except LookupError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Purchase not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Purchase not found"
+        ) from None

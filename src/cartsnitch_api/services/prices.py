@@ -41,12 +41,14 @@ class PriceService:
                     "product_name": ph.normalized_product.canonical_name,
                     "data_points": [],
                 }
-            by_product[pid]["data_points"].append({
-                "date": ph.observed_date,
-                "price": float(ph.regular_price),
-                "store_id": ph.store_id,
-                "store_name": ph.store.name,
-            })
+            by_product[pid]["data_points"].append(
+                {
+                    "date": ph.observed_date,
+                    "price": float(ph.regular_price),
+                    "store_id": ph.store_id,
+                    "store_name": ph.store.name,
+                }
+            )
         return list(by_product.values())
 
     async def get_increases(self) -> list[dict]:
@@ -58,27 +60,32 @@ class PriceService:
         from cartsnitch_common.models import NormalizedProduct, PriceHistory, Store
 
         # Use lag() window function to get previous price in a single query
-        prev_price = func.lag(PriceHistory.regular_price).over(
-            partition_by=[PriceHistory.normalized_product_id, PriceHistory.store_id],
-            order_by=PriceHistory.observed_date,
-        ).label("prev_price")
-
-        row_num = func.row_number().over(
-            partition_by=[PriceHistory.normalized_product_id, PriceHistory.store_id],
-            order_by=PriceHistory.observed_date.desc(),
-        ).label("rn")
-
-        inner = (
-            select(
-                PriceHistory.normalized_product_id,
-                PriceHistory.store_id,
-                PriceHistory.regular_price,
-                PriceHistory.observed_date,
-                prev_price,
-                row_num,
+        prev_price = (
+            func.lag(PriceHistory.regular_price)
+            .over(
+                partition_by=[PriceHistory.normalized_product_id, PriceHistory.store_id],
+                order_by=PriceHistory.observed_date,
             )
-            .subquery()
+            .label("prev_price")
         )
+
+        row_num = (
+            func.row_number()
+            .over(
+                partition_by=[PriceHistory.normalized_product_id, PriceHistory.store_id],
+                order_by=PriceHistory.observed_date.desc(),
+            )
+            .label("rn")
+        )
+
+        inner = select(
+            PriceHistory.normalized_product_id,
+            PriceHistory.store_id,
+            PriceHistory.regular_price,
+            PriceHistory.observed_date,
+            prev_price,
+            row_num,
+        ).subquery()
 
         # Only keep the latest row (rn=1) where price increased
         result = await self.db.execute(
@@ -104,15 +111,17 @@ class PriceService:
         for row in result.all():
             old = float(row.prev_price)
             new = float(row.regular_price)
-            increases.append({
-                "product_id": row.normalized_product_id,
-                "product_name": row.canonical_name,
-                "store_name": row.store_name,
-                "old_price": old,
-                "new_price": new,
-                "increase_pct": round((new - old) / old * 100, 2),
-                "detected_at": row.observed_date,
-            })
+            increases.append(
+                {
+                    "product_id": row.normalized_product_id,
+                    "product_name": row.canonical_name,
+                    "store_name": row.store_name,
+                    "old_price": old,
+                    "new_price": new,
+                    "increase_pct": round((new - old) / old * 100, 2),
+                    "detected_at": row.observed_date,
+                }
+            )
 
         increases.sort(key=lambda x: x["increase_pct"], reverse=True)
         return increases
@@ -156,17 +165,19 @@ class PriceService:
             product = products_by_id.get(pid)
             if not product:
                 continue
-            comparisons.append({
-                "product_id": pid,
-                "product_name": product.canonical_name,
-                "prices": [
-                    {
-                        "store_id": ph.store_id,
-                        "store_name": ph.store.name,
-                        "current_price": float(ph.regular_price),
-                        "last_seen_at": ph.observed_date,
-                    }
-                    for ph in prices_by_product.get(pid, [])
-                ],
-            })
+            comparisons.append(
+                {
+                    "product_id": pid,
+                    "product_name": product.canonical_name,
+                    "prices": [
+                        {
+                            "store_id": ph.store_id,
+                            "store_name": ph.store.name,
+                            "current_price": float(ph.regular_price),
+                            "last_seen_at": ph.observed_date,
+                        }
+                        for ph in prices_by_product.get(pid, [])
+                    ],
+                }
+            )
         return comparisons

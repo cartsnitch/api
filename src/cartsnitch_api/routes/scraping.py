@@ -22,12 +22,12 @@ async def trigger_sync(store_slug: str, user_id: UUID = Depends(get_current_user
         raise HTTPException(
             status_code=e.response.status_code,
             detail="Sync service error",
-        )
+        ) from e
     except RequestError:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Unable to reach sync service",
-        )
+        ) from None
 
 
 @router.get("/status", response_model=list[SyncStatusResponse])
@@ -39,4 +39,4 @@ async def sync_status(user_id: UUID = Depends(get_current_user)):
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Unable to reach sync service",
-        )
+        ) from None

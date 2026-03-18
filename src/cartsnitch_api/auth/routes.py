@@ -26,7 +26,7 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
     try:
         return await svc.register(body.email, body.password, body.display_name)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -37,7 +37,7 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
-        )
+        ) from None
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -48,7 +48,7 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
-        )
+        ) from None
 
 
 @router.get("/me", response_model=UserResponse)
@@ -60,7 +60,9 @@ async def get_me(
     try:
         return await svc.get_user(user_id)
     except LookupError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        ) from None
 
 
 @router.patch("/me", response_model=UserResponse)
@@ -71,13 +73,13 @@ async def update_me(
 ):
     svc = AuthService(db)
     try:
-        return await svc.update_user(
-            user_id, email=body.email, display_name=body.display_name
-        )
+        return await svc.update_user(user_id, email=body.email, display_name=body.display_name)
     except LookupError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        ) from None
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
@@ -89,4 +91,6 @@ async def delete_me(
     try:
         await svc.delete_user(user_id)
     except LookupError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        ) from None

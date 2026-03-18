@@ -48,10 +48,10 @@ class AuthService:
         try:
             payload = decode_token(refresh_token)
         except ValueError:
-            raise ValueError("Invalid refresh token")
+            raise ValueError("Invalid refresh token") from None
 
         if payload.get("type") != "refresh":
-            raise ValueError("Invalid token type")
+            raise ValueError("Invalid token type") from None
 
         user_id = UUID(payload["sub"])
 

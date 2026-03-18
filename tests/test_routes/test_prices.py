@@ -4,9 +4,8 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
 from cartsnitch_common.models import NormalizedProduct, PriceHistory, Store
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
 @pytest.fixture
@@ -58,15 +57,11 @@ async def test_price_trends(client, price_data):
 
 @pytest.mark.asyncio
 async def test_price_trends_by_category(client, price_data):
-    resp = await client.get(
-        "/prices/trends?category=household", headers=price_data["headers"]
-    )
+    resp = await client.get("/prices/trends?category=household", headers=price_data["headers"])
     assert resp.status_code == 200
     assert len(resp.json()) == 1
 
-    resp = await client.get(
-        "/prices/trends?category=nonexistent", headers=price_data["headers"]
-    )
+    resp = await client.get("/prices/trends?category=nonexistent", headers=price_data["headers"])
     assert resp.status_code == 200
     assert len(resp.json()) == 0
 
@@ -86,9 +81,7 @@ async def test_price_increases(client, price_data):
 @pytest.mark.asyncio
 async def test_price_comparison(client, price_data):
     pid = str(price_data["product"].id)
-    resp = await client.get(
-        f"/prices/comparison?product_ids={pid}", headers=price_data["headers"]
-    )
+    resp = await client.get(f"/prices/comparison?product_ids={pid}", headers=price_data["headers"])
     assert resp.status_code == 200
     data = resp.json()
     assert len(data) >= 1
