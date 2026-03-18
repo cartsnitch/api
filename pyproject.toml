@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "CartSnitch API Gateway — public-facing REST API"
 requires-python = ">=3.12"
 dependencies = [
+    "cartsnitch-common>=0.1.0",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.30.0",
     "pydantic[email]>=2.9.0",
