@@ -10,12 +10,31 @@ class ClipArtistClient:
         self.base_url = settings.clipartist_url
         self.headers = {"X-Service-Key": settings.service_key}
 
-    async def optimize_shopping(self, items: list[dict], preferred_stores: list[str] | None = None) -> dict:
+    async def optimize(
+        self,
+        user_id: str,
+        items: list[dict],
+        preferred_stores: list[str] | None = None,
+    ) -> dict:
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 f"{self.base_url}/optimize",
                 headers=self.headers,
-                json={"items": items, "preferred_stores": preferred_stores},
+                json={
+                    "user_id": user_id,
+                    "items": items,
+                    "preferred_stores": preferred_stores,
+                },
+            )
+            resp.raise_for_status()
+            return resp.json()
+
+    async def get_shopping_lists(self, user_id: str) -> list[dict]:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"{self.base_url}/shopping-lists",
+                headers=self.headers,
+                params={"user_id": user_id},
             )
             resp.raise_for_status()
             return resp.json()

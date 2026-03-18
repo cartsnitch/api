@@ -2,10 +2,13 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from cartsnitch_api.auth.dependencies import get_current_user
+from cartsnitch_api.database import get_db
 from cartsnitch_api.schemas import PriceComparisonResponse, PriceIncreaseResponse, PriceTrendResponse
+from cartsnitch_api.services.prices import PriceService
 
 router = APIRouter(prefix="/prices", tags=["prices"])
 
@@ -14,21 +17,26 @@ router = APIRouter(prefix="/prices", tags=["prices"])
 async def price_trends(
     user_id: UUID = Depends(get_current_user),
     category: str | None = Query(None),
+    db: AsyncSession = Depends(get_db),
 ):
-    # TODO: call service layer — aggregate price trends
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+    svc = PriceService(db)
+    return await svc.get_trends(category)
 
 
 @router.get("/increases", response_model=list[PriceIncreaseResponse])
-async def price_increases(user_id: UUID = Depends(get_current_user)):
-    # TODO: call service layer — recent significant price increases
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+async def price_increases(
+    user_id: UUID = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    svc = PriceService(db)
+    return await svc.get_increases()
 
 
 @router.get("/comparison", response_model=list[PriceComparisonResponse])
 async def price_comparison(
     product_ids: list[UUID] = Query(...),
     user_id: UUID = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    # TODO: call service layer — compare items across stores
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+    svc = PriceService(db)
+    return await svc.get_comparison(product_ids)
