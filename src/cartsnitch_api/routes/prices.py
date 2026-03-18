@@ -7,7 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from cartsnitch_api.auth.dependencies import get_current_user
 from cartsnitch_api.database import get_db
-from cartsnitch_api.schemas import PriceComparisonResponse, PriceIncreaseResponse, PriceTrendResponse
+from cartsnitch_api.schemas import (
+    PriceComparisonResponse,
+    PriceIncreaseResponse,
+    PriceTrendResponse,
+)
 from cartsnitch_api.services.prices import PriceService
 
 router = APIRouter(prefix="/prices", tags=["prices"])

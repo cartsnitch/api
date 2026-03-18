@@ -72,7 +72,7 @@ async def test_all_routes_in_openapi():
             if (method, path) not in registered:
                 missing.append(f"{method.upper()} {path}")
 
-        assert not missing, f"Missing routes in OpenAPI spec:\n" + "\n".join(missing)
+        assert not missing, "Missing routes in OpenAPI spec:\n" + "\n".join(missing)
 
 
 @pytest.mark.asyncio
@@ -84,7 +84,7 @@ async def test_route_count():
         paths = spec["paths"]
 
         count = 0
-        for path, methods in paths.items():
+        for _path, methods in paths.items():
             for method in methods:
                 if method in ("get", "post", "put", "delete", "patch"):
                     count += 1

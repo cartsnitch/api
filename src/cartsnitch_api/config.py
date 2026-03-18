@@ -40,8 +40,10 @@ class Settings(BaseSettings):
             raise ValueError(
                 "CARTSNITCH_FERNET_KEY must be a valid Fernet key "
                 "(32 bytes, url-safe base64 encoded). "
-                "Generate one with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
-            )
+                "Generate one with: python -c "
+                "'from cryptography.fernet import Fernet; "
+                "print(Fernet.generate_key().decode())'"
+            ) from None
         return self
 
 

@@ -5,9 +5,9 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
+from cartsnitch_common.models import Purchase, PurchaseItem, Store, User
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from cartsnitch_common.models import Purchase, PurchaseItem, Store, User
 from cartsnitch_api.auth.jwt import create_access_token
 
 

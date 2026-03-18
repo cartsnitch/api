@@ -13,14 +13,11 @@ def latest_price_per_store(product_ids: list[UUID] | None = None):
     """
     from cartsnitch_common.models import PriceHistory
 
-    query = (
-        select(
-            PriceHistory.normalized_product_id,
-            PriceHistory.store_id,
-            func.max(PriceHistory.observed_date).label("max_date"),
-        )
-        .group_by(PriceHistory.normalized_product_id, PriceHistory.store_id)
-    )
+    query = select(
+        PriceHistory.normalized_product_id,
+        PriceHistory.store_id,
+        func.max(PriceHistory.observed_date).label("max_date"),
+    ).group_by(PriceHistory.normalized_product_id, PriceHistory.store_id)
     if product_ids is not None:
         query = query.where(PriceHistory.normalized_product_id.in_(product_ids))
     return query.subquery()

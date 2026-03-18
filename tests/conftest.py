@@ -1,11 +1,11 @@
 """Shared test fixtures with in-memory SQLite database."""
 
 import pytest
+from cartsnitch_common.models import Base
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from cartsnitch_common.models import Base
 from cartsnitch_api.database import get_db
 from cartsnitch_api.main import create_app
 
@@ -61,11 +61,14 @@ async def client(db_engine):
 @pytest.fixture
 async def auth_headers(client):
     """Register a test user and return auth headers."""
-    resp = await client.post("/auth/register", json={
-        "email": "test@example.com",
-        "password": "testpass123",
-        "display_name": "Test User",
-    })
+    resp = await client.post(
+        "/auth/register",
+        json={
+            "email": "test@example.com",
+            "password": "testpass123",
+            "display_name": "Test User",
+        },
+    )
     assert resp.status_code == 201
     token = resp.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}

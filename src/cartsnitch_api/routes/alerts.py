@@ -39,5 +39,6 @@ async def update_alert_settings(
 ):
     raise HTTPException(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Alert settings persistence not yet implemented. Use GET /alerts/settings for current defaults.",
+        detail="Alert settings persistence not yet implemented. "
+        "Use GET /alerts/settings for current defaults.",
     )

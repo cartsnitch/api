@@ -36,7 +36,9 @@ async def get_product(
     try:
         return await svc.get_product(product_id)
     except LookupError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+        ) from None
 
 
 @router.get("/{product_id}/prices", response_model=PriceTrendResponse)
@@ -49,4 +51,6 @@ async def get_product_prices(
     try:
         return await svc.get_price_history(product_id)
     except LookupError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+        ) from None
