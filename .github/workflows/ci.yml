@@ -20,7 +20,7 @@ env:
 
 jobs:
   lint:
-    runs-on: local-ubuntu-latest-cartsnitch
+    runs-on: runners-cartsnitch
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -34,7 +34,7 @@ jobs:
         run: ruff format --check .
 
   typecheck:
-    runs-on: local-ubuntu-latest-cartsnitch
+    runs-on: runners-cartsnitch
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
         run: mypy src/cartsnitch_api
 
   test:
-    runs-on: local-ubuntu-latest-cartsnitch
+    runs-on: runners-cartsnitch
     services:
       postgres:
         image: ghcr.io/cartsnitch/mirror/postgres:15-alpine
@@ -112,7 +112,7 @@ jobs:
         run: pytest --tb=short -q
 
   build-and-push:
-    runs-on: local-ubuntu-latest-cartsnitch
+    runs-on: runners-cartsnitch
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v4
