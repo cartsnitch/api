@@ -20,7 +20,7 @@ env:
 
 jobs:
   lint:
-    runs-on: local-ubuntu-latest-cartsnitch
+    runs-on: runners-cartsnitch
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -34,7 +34,7 @@ jobs:
         run: ruff format --check .
 
   typecheck:
-    runs-on: local-ubuntu-latest-cartsnitch
+    runs-on: runners-cartsnitch
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -57,13 +57,10 @@ jobs:
         run: mypy src/cartsnitch_api
 
   test:
-    runs-on: local-ubuntu-latest-cartsnitch
+    runs-on: runners-cartsnitch
     services:
       postgres:
-        image: ghcr.io/cartsnitch/mirror/postgres:15-alpine
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        image: postgres:15-alpine
         env:
           POSTGRES_USER: cartsnitch
           POSTGRES_PASSWORD: cartsnitch_test
@@ -76,10 +73,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       redis:
-        image: ghcr.io/cartsnitch/mirror/redis:7-alpine
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        image: redis:7-alpine
         ports:
           - 6379:6379
         options: >-
@@ -112,7 +106,7 @@ jobs:
         run: pytest --tb=short -q
 
   build-and-push:
-    runs-on: local-ubuntu-latest-cartsnitch
+    runs-on: runners-cartsnitch
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v4
