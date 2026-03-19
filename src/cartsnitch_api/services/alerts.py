@@ -17,7 +17,7 @@ class AlertService:
 
     async def list_alerts(self, user_id: UUID) -> list[dict]:
         """List shrinkflation events for products the user has purchased."""
-        from cartsnitch_common.models import Purchase, PurchaseItem, ShrinkflationEvent
+        from cartsnitch_api.models import Purchase, PurchaseItem, ShrinkflationEvent
 
         # Get product IDs from user's purchases
         items_result = await self.db.execute(

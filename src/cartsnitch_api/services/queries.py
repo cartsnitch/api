@@ -11,7 +11,7 @@ def latest_price_per_store(product_ids: list[UUID] | None = None):
     Optionally filtered to a list of product IDs. Returns a subquery with
     columns: normalized_product_id, store_id, max_date.
     """
-    from cartsnitch_common.models import PriceHistory
+    from cartsnitch_api.models import PriceHistory
 
     query = select(
         PriceHistory.normalized_product_id,

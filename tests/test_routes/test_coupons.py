@@ -4,8 +4,9 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from cartsnitch_common.models import Coupon, Store
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from cartsnitch_api.models import Coupon, Store
 
 
 @pytest.fixture

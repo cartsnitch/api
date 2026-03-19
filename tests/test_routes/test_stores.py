@@ -1,7 +1,8 @@
 """Integration tests for store endpoints."""
 
 import pytest
-from cartsnitch_common.models import Store
+
+from cartsnitch_api.models import Store
 
 
 @pytest.fixture

@@ -15,7 +15,7 @@ class AuthService:
         self.db = db
 
     async def register(self, email: str, password: str, display_name: str) -> dict:
-        from cartsnitch_common.models import User
+        from cartsnitch_api.models import User
 
         existing = await self.db.execute(select(User).where(User.email == email))
         if existing.scalar_one_or_none():
@@ -33,7 +33,7 @@ class AuthService:
         return self._make_token_response(user.id)
 
     async def login(self, email: str, password: str) -> dict:
-        from cartsnitch_common.models import User
+        from cartsnitch_api.models import User
 
         result = await self.db.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
@@ -43,7 +43,7 @@ class AuthService:
         return self._make_token_response(user.id)
 
     async def refresh(self, refresh_token: str) -> dict:
-        from cartsnitch_common.models import User
+        from cartsnitch_api.models import User
 
         try:
             payload = decode_token(refresh_token)
@@ -63,7 +63,7 @@ class AuthService:
         return self._make_token_response(user_id)
 
     async def get_user(self, user_id: UUID) -> dict:
-        from cartsnitch_common.models import User
+        from cartsnitch_api.models import User
 
         result = await self.db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
@@ -78,7 +78,7 @@ class AuthService:
         }
 
     async def update_user(self, user_id: UUID, **fields) -> dict:
-        from cartsnitch_common.models import User
+        from cartsnitch_api.models import User
 
         result = await self.db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
@@ -106,7 +106,7 @@ class AuthService:
         }
 
     async def delete_user(self, user_id: UUID) -> None:
-        from cartsnitch_common.models import User
+        from cartsnitch_api.models import User
 
         result = await self.db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()

@@ -13,7 +13,7 @@ class CouponService:
         self.db = db
 
     async def list_coupons(self, store_id: UUID | None = None) -> list[dict]:
-        from cartsnitch_common.models import Coupon
+        from cartsnitch_api.models import Coupon
 
         today = date.today()
         query = (
@@ -31,12 +31,12 @@ class CouponService:
 
     async def relevant_coupons(self, user_id: UUID) -> list[dict]:
         """Coupons for products the user has purchased."""
-        from cartsnitch_common.models import Coupon, PurchaseItem
+        from cartsnitch_api.models import Coupon, PurchaseItem
 
         today = date.today()
 
         # Get product IDs from user's purchase history
-        from cartsnitch_common.models import Purchase
+        from cartsnitch_api.models import Purchase
 
         items_result = await self.db.execute(
             select(PurchaseItem.normalized_product_id)

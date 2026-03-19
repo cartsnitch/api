@@ -20,7 +20,7 @@ class StoreService:
         self.db = db
 
     async def list_stores(self) -> list[dict]:
-        from cartsnitch_common.models import Store
+        from cartsnitch_api.models import Store
 
         result = await self.db.execute(select(Store).order_by(Store.name))
         stores = result.scalars().all()
@@ -36,7 +36,7 @@ class StoreService:
         ]
 
     async def list_user_stores(self, user_id: UUID) -> list[dict]:
-        from cartsnitch_common.models import UserStoreAccount
+        from cartsnitch_api.models import UserStoreAccount
 
         result = await self.db.execute(
             select(UserStoreAccount)
@@ -61,7 +61,7 @@ class StoreService:
         ]
 
     async def connect_store(self, user_id: UUID, store_slug: str, credentials: dict | None) -> dict:
-        from cartsnitch_common.models import Store, UserStoreAccount
+        from cartsnitch_api.models import Store, UserStoreAccount
 
         result = await self.db.execute(select(Store).where(Store.slug == store_slug))
         store = result.scalar_one_or_none()
@@ -108,7 +108,7 @@ class StoreService:
         }
 
     async def disconnect_store(self, user_id: UUID, store_slug: str) -> None:
-        from cartsnitch_common.models import Store, UserStoreAccount
+        from cartsnitch_api.models import Store, UserStoreAccount
 
         result = await self.db.execute(select(Store).where(Store.slug == store_slug))
         store = result.scalar_one_or_none()

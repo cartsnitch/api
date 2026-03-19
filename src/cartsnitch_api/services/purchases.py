@@ -18,7 +18,7 @@ class PurchaseService:
         page: int = 1,
         page_size: int = 20,
     ) -> list[dict]:
-        from cartsnitch_common.models import Purchase, PurchaseItem, Store
+        from cartsnitch_api.models import Purchase, PurchaseItem, Store
 
         # Count items per purchase in a single subquery instead of N+1
         item_counts = (
@@ -57,7 +57,7 @@ class PurchaseService:
         ]
 
     async def get_purchase(self, purchase_id: UUID, user_id: UUID) -> dict:
-        from cartsnitch_common.models import Purchase
+        from cartsnitch_api.models import Purchase
 
         result = await self.db.execute(
             select(Purchase)
@@ -89,7 +89,7 @@ class PurchaseService:
         }
 
     async def get_stats(self, user_id: UUID) -> dict:
-        from cartsnitch_common.models import Purchase
+        from cartsnitch_api.models import Purchase
 
         result = await self.db.execute(
             select(Purchase)
