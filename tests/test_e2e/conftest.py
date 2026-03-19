@@ -5,11 +5,12 @@ purchases, coupons, and shrinkflation events so E2E flows can
 exercise cross-resource queries against real data.
 """
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, timedelta
 from decimal import Decimal
-from uuid import UUID
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
 from cartsnitch_api.auth.jwt import decode_token
 from cartsnitch_api.models import (
     Coupon,
@@ -20,7 +21,6 @@ from cartsnitch_api.models import (
     ShrinkflationEvent,
     Store,
 )
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 # Shared test constants
 ZERO_UUID = "00000000-0000-0000-0000-000000000000"
