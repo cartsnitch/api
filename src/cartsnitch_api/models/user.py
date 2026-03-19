@@ -4,11 +4,12 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from cartsnitch_api.constants import AccountStatus
 from cartsnitch_api.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+from cartsnitch_api.types import EncryptedJSON
 
 if TYPE_CHECKING:
     from cartsnitch_api.models.purchase import Purchase
@@ -37,9 +38,7 @@ class UserStoreAccount(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     store_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("stores.id"), nullable=False)
-    # WARNING: Contains retailer session cookies/tokens. Encryption-at-rest
-    # required before production deployment (e.g., pgcrypto or app-level encryption).
-    session_data: Mapped[dict | None] = mapped_column(JSON)
+    session_data: Mapped[dict | None] = mapped_column(EncryptedJSON)
     session_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[AccountStatus] = mapped_column(
