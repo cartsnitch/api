@@ -2,6 +2,8 @@
 
 import pytest
 
+from tests.test_e2e.conftest import ZERO_UUID
+
 
 @pytest.mark.asyncio
 class TestProductSearch:
@@ -69,7 +71,7 @@ class TestProductLookup:
 
     async def test_product_not_found(self, client, seed_data):
         resp = await client.get(
-            "/products/00000000-0000-0000-0000-000000000000", headers=seed_data["headers"]
+            f"/products/{ZERO_UUID}", headers=seed_data["headers"]
         )
         assert resp.status_code == 404
 

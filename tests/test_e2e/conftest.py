@@ -7,9 +7,11 @@ exercise cross-resource queries against real data.
 
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
+from uuid import UUID
 
 import pytest
-from cartsnitch_common.models import (
+from cartsnitch_api.auth.jwt import decode_token
+from cartsnitch_api.models import (
     Coupon,
     NormalizedProduct,
     PriceHistory,
@@ -19,6 +21,12 @@ from cartsnitch_common.models import (
     Store,
 )
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+# Shared test constants
+ZERO_UUID = "00000000-0000-0000-0000-000000000000"
+BAD_UUID = "not-a-uuid"
+# Fixed anchor date for deterministic tests
+ANCHOR_DATE = date(2026, 3, 15)
 
 
 @pytest.fixture
@@ -47,7 +55,7 @@ async def seed_data(db_engine, auth_headers):
             category="dairy",
             brand="Meijer",
             size="1",
-            size_unit="l",
+            size_unit="gal",
         )
         chicken = NormalizedProduct(
             canonical_name="Chicken Breast 1lb",
@@ -60,7 +68,7 @@ async def seed_data(db_engine, auth_headers):
         await session.flush()
 
         # -- Price history (multiple dates, multiple stores) --
-        today = date.today()
+        today = ANCHOR_DATE
         prices = []
         # Cheerios at Meijer: price increase over time
         for i, price_val in enumerate([Decimal("3.99"), Decimal("4.29"), Decimal("4.79")]):
@@ -118,9 +126,6 @@ async def seed_data(db_engine, auth_headers):
         await session.flush()
 
         # -- Purchases (need the user_id from the registered test user) --
-        # Decode user_id from the JWT in auth_headers
-        from cartsnitch_api.auth.jwt import decode_token
-
         token = auth_headers["Authorization"].split(" ")[1]
         payload = decode_token(token)
         user_id = payload["sub"]
@@ -128,7 +133,7 @@ async def seed_data(db_engine, auth_headers):
         purchase1 = Purchase(
             user_id=user_id,
             store_id=meijer.id,
-            receipt_id="meijer-2024-001",
+            receipt_id="meijer-2026-001",
             purchase_date=today - timedelta(days=10),
             total=Decimal("23.45"),
             subtotal=Decimal("21.50"),
@@ -137,7 +142,7 @@ async def seed_data(db_engine, auth_headers):
         purchase2 = Purchase(
             user_id=user_id,
             store_id=kroger.id,
-            receipt_id="kroger-2024-001",
+            receipt_id="kroger-2026-001",
             purchase_date=today - timedelta(days=5),
             total=Decimal("15.78"),
             subtotal=Decimal("14.50"),

@@ -147,3 +147,66 @@ class TestAuthProtectedEndpoints:
     async def test_endpoints_require_auth(self, client, db_engine, method, path):
         resp = await client.request(method, path)
         assert resp.status_code in (401, 403), f"{method} {path} should require auth"
+
+
+@pytest.mark.asyncio
+class TestCrossUserDataIsolation:
+    """Verify that users cannot access other users' data."""
+
+    async def test_user_b_cannot_access_user_a_purchases(self, client, seed_data):
+        """Register a second user and verify they cannot see User A's purchases."""
+        # User A's purchase (from seed_data)
+        purchase_id = str(seed_data["purchases"]["meijer_trip"].id)
+
+        # Register User B
+        reg = await client.post(
+            "/auth/register",
+            json={
+                "email": "userb@example.com",
+                "password": "securepass123",
+                "display_name": "User B",
+            },
+        )
+        assert reg.status_code == 201
+        user_b_headers = {"Authorization": f"Bearer {reg.json()['access_token']}"}
+
+        # User B tries to access User A's specific purchase
+        resp = await client.get(f"/purchases/{purchase_id}", headers=user_b_headers)
+        assert resp.status_code in (403, 404), (
+            "User B should not be able to access User A's purchase"
+        )
+
+    async def test_user_b_purchase_list_is_empty(self, client, seed_data):
+        """A new user should see no purchases (not User A's purchases)."""
+        reg = await client.post(
+            "/auth/register",
+            json={
+                "email": "userc@example.com",
+                "password": "securepass123",
+                "display_name": "User C",
+            },
+        )
+        assert reg.status_code == 201
+        user_c_headers = {"Authorization": f"Bearer {reg.json()['access_token']}"}
+
+        resp = await client.get("/purchases", headers=user_c_headers)
+        assert resp.status_code == 200
+        assert len(resp.json()) == 0, "New user should have no purchases"
+
+    async def test_user_b_stores_isolated(self, client, seed_data):
+        """User B's connected stores should be independent from User A."""
+        reg = await client.post(
+            "/auth/register",
+            json={
+                "email": "userd@example.com",
+                "password": "securepass123",
+                "display_name": "User D",
+            },
+        )
+        assert reg.status_code == 201
+        user_d_headers = {"Authorization": f"Bearer {reg.json()['access_token']}"}
+
+        # User D should have no connected stores
+        resp = await client.get("/me/stores", headers=user_d_headers)
+        assert resp.status_code == 200
+        assert len(resp.json()) == 0, "New user should have no connected stores"

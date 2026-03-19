@@ -2,9 +2,7 @@
 
 import pytest
 
-
-ZERO_UUID = "00000000-0000-0000-0000-000000000000"
-BAD_UUID = "not-a-uuid"
+from tests.test_e2e.conftest import BAD_UUID, ZERO_UUID
 
 
 @pytest.mark.asyncio

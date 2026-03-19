@@ -82,10 +82,9 @@ class TestCouponFlow:
         resp = await client.get("/coupons/relevant", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
-        # Should include the Cheerios coupon since user purchased Cheerios
-        if len(data) > 0:
-            descriptions = [c["description"] for c in data]
-            assert any("Cheerios" in d for d in descriptions)
+        assert len(data) >= 1, "Expected at least one relevant coupon for user with purchases"
+        descriptions = [c["description"] for c in data]
+        assert any("Cheerios" in d for d in descriptions)
 
 
 @pytest.mark.asyncio
@@ -97,8 +96,14 @@ class TestAlertFlow:
         headers = seed_data["headers"]
         resp = await client.get("/alerts", headers=headers)
         assert resp.status_code == 200
-        # The response is a list (may be empty if alert generation is async)
-        assert isinstance(resp.json(), list)
+        data = resp.json()
+        assert isinstance(data, list)
+        # If alerts are generated synchronously, verify shrinkflation alert content
+        if len(data) > 0:
+            alert_types = [a["alert_type"] for a in data]
+            product_names = [a["product_name"] for a in data]
+            assert any(t in ("shrinkflation", "price_increase") for t in alert_types)
+            assert any("Cheerios" in name for name in product_names)
 
     async def test_alert_settings_default(self, client, seed_data):
         headers = seed_data["headers"]

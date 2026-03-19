@@ -2,6 +2,8 @@
 
 import pytest
 
+from tests.test_e2e.conftest import ZERO_UUID
+
 
 @pytest.mark.asyncio
 class TestPurchaseList:
@@ -60,7 +62,7 @@ class TestPurchaseDetail:
 
     async def test_purchase_not_found(self, client, seed_data):
         resp = await client.get(
-            "/purchases/00000000-0000-0000-0000-000000000000",
+            f"/purchases/{ZERO_UUID}",
             headers=seed_data["headers"],
         )
         assert resp.status_code == 404
