@@ -6,11 +6,20 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+from cartsnitch_api.config import settings as cartsnitch_settings
 from cartsnitch_api.database import get_db
 from cartsnitch_api.main import create_app
 from cartsnitch_api.models import Base
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+
+@pytest.fixture(autouse=True)
+def disable_rate_limiting():
+    """Disable rate limiting for all tests to prevent 429 interference."""
+    cartsnitch_settings.rate_limit_enabled = False
+    yield
+    cartsnitch_settings.rate_limit_enabled = True
 
 
 @pytest.fixture
