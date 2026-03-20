@@ -7,6 +7,7 @@ exercise cross-resource queries against real data.
 
 from datetime import date, timedelta
 from decimal import Decimal
+from uuid import UUID
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -128,7 +129,7 @@ async def seed_data(db_engine, auth_headers):
         # -- Purchases (need the user_id from the registered test user) --
         token = auth_headers["Authorization"].split(" ")[1]
         payload = decode_token(token)
-        user_id = payload["sub"]
+        user_id = UUID(payload["sub"])
 
         purchase1 = Purchase(
             user_id=user_id,

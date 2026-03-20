@@ -23,6 +23,9 @@ def create_refresh_token(user_id: UUID) -> str:
 
 def decode_token(token: str) -> dict:
     try:
-        return cast(dict[str, Any], jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]))
+        return cast(
+            dict[str, Any],
+            jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]),
+        )
     except JWTError as e:
         raise ValueError(f"Invalid token: {e}") from e

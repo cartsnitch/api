@@ -28,6 +28,7 @@ class Settings(BaseSettings):
 
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60
+    rate_limit_enabled: bool = True
 
     @model_validator(mode="after")
     def validate_fernet_key(self):

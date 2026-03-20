@@ -80,8 +80,8 @@ def _get_rate_limit_key(request: Request) -> tuple[str, _SlidingWindowCounter]:
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Skip rate limiting for health checks
-        if request.url.path == "/health":
+        # Skip rate limiting when disabled (e.g. in tests) or for health checks
+        if not settings.rate_limit_enabled or request.url.path == "/health":
             return await call_next(request)
 
         key, limiter = _get_rate_limit_key(request)
