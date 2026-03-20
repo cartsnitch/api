@@ -43,7 +43,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libpq-dev
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev build-essential
       - name: Install cartsnitch-common from GitHub
         run: pip install "cartsnitch-common @ git+https://github.com/cartsnitch/common.git"
       - run: pip install -e ".[dev]" mypy
@@ -92,7 +92,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libpq-dev
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev build-essential
       - name: Install cartsnitch-common from GitHub
         run: pip install "cartsnitch-common @ git+https://github.com/cartsnitch/common.git"
       - run: pip install -e ".[dev]"
