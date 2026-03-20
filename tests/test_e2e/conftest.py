@@ -219,9 +219,22 @@ async def seed_data(db_engine, auth_headers):
         session.add(shrink)
         await session.commit()
 
-        for obj in [meijer, kroger, target, cheerios, milk, chicken,
-                    purchase1, purchase2, item1, item2, item3,
-                    coupon1, coupon2, shrink]:
+        for obj in [
+            meijer,
+            kroger,
+            target,
+            cheerios,
+            milk,
+            chicken,
+            purchase1,
+            purchase2,
+            item1,
+            item2,
+            item3,
+            coupon1,
+            coupon2,
+            shrink,
+        ]:
             await session.refresh(obj)
 
         return {

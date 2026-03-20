@@ -42,9 +42,7 @@ class TestPriceIncreases:
         assert resp.status_code == 200
         data = resp.json()
         # Cheerios at Meijer went from 3.99 → 4.29 → 4.79
-        cheerios_increases = [
-            inc for inc in data if inc["product_name"] == "Cheerios 18oz"
-        ]
+        cheerios_increases = [inc for inc in data if inc["product_name"] == "Cheerios 18oz"]
         assert len(cheerios_increases) >= 1
         # Verify the increase data makes sense
         for inc in cheerios_increases:
@@ -57,7 +55,8 @@ class TestPriceIncreases:
         resp = await client.get("/prices/increases", headers=seed_data["headers"])
         data = resp.json()
         kroger_increases = [
-            inc for inc in data
+            inc
+            for inc in data
             if inc["product_name"] == "Cheerios 18oz" and inc["store_name"] == "Kroger"
         ]
         assert len(kroger_increases) == 0

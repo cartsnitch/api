@@ -53,9 +53,7 @@ class TestEncryptedJSONType:
     def test_round_trip(self, session, user, store):
         """Data written via the ORM comes back as the original dict."""
         original = {"token": "abc123", "cookies": {"session_id": "xyz"}}
-        account = UserStoreAccount(
-            user_id=user.id, store_id=store.id, session_data=original
-        )
+        account = UserStoreAccount(user_id=user.id, store_id=store.id, session_data=original)
         session.add(account)
         session.commit()
 
@@ -65,17 +63,13 @@ class TestEncryptedJSONType:
     def test_stored_value_is_encrypted(self, session, user, store):
         """The raw value in the DB should be a Fernet token, not plaintext JSON."""
         original = {"secret": "do-not-leak"}
-        account = UserStoreAccount(
-            user_id=user.id, store_id=store.id, session_data=original
-        )
+        account = UserStoreAccount(user_id=user.id, store_id=store.id, session_data=original)
         session.add(account)
         session.commit()
 
         # Use a raw table construct to bypass TypeDecorator on read
         raw_table = table("user_store_accounts", column("id"), column("session_data"))
-        raw = session.execute(
-            raw_table.select().where(raw_table.c.id == str(account.id))
-        ).first()
+        raw = session.execute(raw_table.select().where(raw_table.c.id == str(account.id))).first()
         # If UUID matching fails with str, try bytes format
         if raw is None:
             raw = session.execute(
@@ -94,9 +88,7 @@ class TestEncryptedJSONType:
 
     def test_null_round_trip(self, session, user, store):
         """NULL session_data stays NULL."""
-        account = UserStoreAccount(
-            user_id=user.id, store_id=store.id, session_data=None
-        )
+        account = UserStoreAccount(user_id=user.id, store_id=store.id, session_data=None)
         session.add(account)
         session.commit()
 
@@ -105,9 +97,7 @@ class TestEncryptedJSONType:
 
     def test_empty_dict_round_trip(self, session, user, store):
         """Empty dict round-trips correctly."""
-        account = UserStoreAccount(
-            user_id=user.id, store_id=store.id, session_data={}
-        )
+        account = UserStoreAccount(user_id=user.id, store_id=store.id, session_data={})
         session.add(account)
         session.commit()
 
@@ -116,9 +106,7 @@ class TestEncryptedJSONType:
 
     def test_update_session_data(self, session, user, store):
         """Updating session_data re-encrypts the new value."""
-        account = UserStoreAccount(
-            user_id=user.id, store_id=store.id, session_data={"v": 1}
-        )
+        account = UserStoreAccount(user_id=user.id, store_id=store.id, session_data={"v": 1})
         session.add(account)
         session.commit()
 

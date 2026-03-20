@@ -53,9 +53,7 @@ class TestPurchaseDetail:
         purchase_id = str(seed_data["purchases"]["meijer_trip"].id)
         resp = await client.get(f"/purchases/{purchase_id}", headers=seed_data["headers"])
         data = resp.json()
-        cheerios_item = next(
-            li for li in data["line_items"] if "Cheerios" in li["name"]
-        )
+        cheerios_item = next(li for li in data["line_items"] if "Cheerios" in li["name"])
         assert cheerios_item["unit_price"] == 4.79
         assert cheerios_item["quantity"] == 1.0
         assert cheerios_item["total_price"] == 4.79
