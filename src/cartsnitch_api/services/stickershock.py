@@ -1,5 +1,7 @@
 """HTTP client for StickerShock internal API."""
 
+from typing import Any, cast
+
 import httpx
 
 from cartsnitch_api.config import settings
@@ -18,7 +20,7 @@ class StickerShockClient:
                 params=params,
             )
             resp.raise_for_status()
-            return resp.json()
+            return cast(list[dict[str, Any]], resp.json())
 
     async def get_inflation_data(self) -> dict:
         async with httpx.AsyncClient() as client:
@@ -27,4 +29,4 @@ class StickerShockClient:
                 headers=self.headers,
             )
             resp.raise_for_status()
-            return resp.json()
+            return cast(dict[str, Any], resp.json())

@@ -1,5 +1,7 @@
 """HTTP client for ClipArtist internal API."""
 
+from typing import Any, cast
+
 import httpx
 
 from cartsnitch_api.config import settings
@@ -27,7 +29,7 @@ class ClipArtistClient:
                 },
             )
             resp.raise_for_status()
-            return resp.json()
+            return cast(dict[str, Any], resp.json())
 
     async def get_shopping_lists(self, user_id: str) -> list[dict]:
         async with httpx.AsyncClient() as client:
@@ -37,7 +39,7 @@ class ClipArtistClient:
                 params={"user_id": user_id},
             )
             resp.raise_for_status()
-            return resp.json()
+            return cast(list[dict[str, Any]], resp.json())
 
     async def get_relevant_coupons(self, user_id: str) -> list[dict]:
         async with httpx.AsyncClient() as client:
@@ -47,4 +49,4 @@ class ClipArtistClient:
                 params={"user_id": user_id},
             )
             resp.raise_for_status()
-            return resp.json()
+            return cast(list[dict[str, Any]], resp.json())

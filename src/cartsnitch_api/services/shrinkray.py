@@ -1,5 +1,7 @@
 """HTTP client for ShrinkRay internal API."""
 
+from typing import Any, cast
+
 import httpx
 
 from cartsnitch_api.config import settings
@@ -18,4 +20,4 @@ class ShrinkRayClient:
                 params={"user_id": user_id},
             )
             resp.raise_for_status()
-            return resp.json()
+            return cast(list[dict[str, Any]], resp.json())
