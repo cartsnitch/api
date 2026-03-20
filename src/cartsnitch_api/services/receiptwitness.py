@@ -1,5 +1,7 @@
 """HTTP client for ReceiptWitness internal API."""
 
+from typing import Any, cast
+
 import httpx
 
 from cartsnitch_api.config import settings
@@ -18,7 +20,7 @@ class ReceiptWitnessClient:
                 json={"user_id": user_id},
             )
             resp.raise_for_status()
-            return resp.json()
+            return cast(dict[str, Any], resp.json())
 
     async def get_sync_status(self, user_id: str) -> list[dict]:
         async with httpx.AsyncClient() as client:
@@ -28,4 +30,4 @@ class ReceiptWitnessClient:
                 params={"user_id": user_id},
             )
             resp.raise_for_status()
-            return resp.json()
+            return cast(list[dict[str, Any]], resp.json())
