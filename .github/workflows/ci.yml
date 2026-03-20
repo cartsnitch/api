@@ -42,16 +42,10 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Generate GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: 3101967
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          repositories: common
-          owner: cartsnitch
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev build-essential
       - name: Install cartsnitch-common from GitHub
-        run: pip install "cartsnitch-common @ git+https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/cartsnitch/common.git"
+        run: pip install "cartsnitch-common @ git+https://github.com/cartsnitch/common.git"
       - run: pip install -e ".[dev]" mypy
       - name: Type check
         run: mypy src/cartsnitch_api
@@ -61,6 +55,9 @@ jobs:
     services:
       postgres:
         image: postgres:15-alpine
+        credentials:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
         env:
           POSTGRES_USER: cartsnitch
           POSTGRES_PASSWORD: cartsnitch_test
@@ -74,6 +71,9 @@ jobs:
           --health-retries 5
       redis:
         image: redis:7-alpine
+        credentials:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
         ports:
           - 6379:6379
         options: >-
@@ -91,16 +91,10 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Generate GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: 3101967
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          repositories: common
-          owner: cartsnitch
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev build-essential
       - name: Install cartsnitch-common from GitHub
-        run: pip install "cartsnitch-common @ git+https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/cartsnitch/common.git"
+        run: pip install "cartsnitch-common @ git+https://github.com/cartsnitch/common.git"
       - run: pip install -e ".[dev]"
       - name: Run tests
         run: pytest --tb=short -q
