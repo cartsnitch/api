@@ -4,6 +4,7 @@ import json
 
 import pytest
 from cryptography.fernet import Fernet
+from pydantic import ValidationError
 from sqlalchemy import column, create_engine, table, text
 from sqlalchemy.orm import sessionmaker
 
@@ -134,9 +135,8 @@ class TestEncryptionKeyValidation:
     def test_invalid_fernet_key_rejected(self, monkeypatch):
         """Settings validation rejects a bad key."""
         monkeypatch.setenv("CARTSNITCH_FERNET_KEY", "not-a-valid-key")
-        from pydantic_settings import BaseSettings
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             from cartsnitch_api.config import Settings
 
             Settings()
