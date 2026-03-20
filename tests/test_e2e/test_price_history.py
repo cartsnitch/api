@@ -87,7 +87,7 @@ class TestPriceComparison:
         milk_id = str(seed_data["products"]["milk"].id)
         resp = await client.get(
             "/prices/comparison",
-            params={"product_ids": f"{cheerios_id},{milk_id}"},
+            params=[("product_ids", cheerios_id), ("product_ids", milk_id)],
             headers=seed_data["headers"],
         )
         assert resp.status_code == 200

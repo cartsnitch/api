@@ -27,7 +27,11 @@ class TestPublicStoreComparison:
     """Public store comparison endpoint."""
 
     async def test_store_comparison(self, client, seed_data):
-        resp = await client.get("/public/store-comparison")
+        cheerios_id = str(seed_data["products"]["cheerios"].id)
+        resp = await client.get(
+            "/public/store-comparison",
+            params=[("product_ids", cheerios_id)],
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert "products" in data
