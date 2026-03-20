@@ -9,9 +9,10 @@ import json
 import os
 
 import sqlalchemy as sa
-from alembic import op
 from cryptography.fernet import Fernet
 from sqlalchemy import text
+
+from alembic import op
 
 revision = "001_encrypt_session_data"
 down_revision = None
