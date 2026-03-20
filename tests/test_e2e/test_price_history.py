@@ -82,6 +82,11 @@ class TestPriceComparison:
         assert "Meijer" in store_names
         assert "Kroger" in store_names
 
+    async def test_compare_requires_product_ids(self, client, seed_data):
+        """product_ids is required — omitting it must return 422."""
+        resp = await client.get("/prices/comparison", headers=seed_data["headers"])
+        assert resp.status_code == 422
+
     async def test_compare_multiple_products(self, client, seed_data):
         cheerios_id = str(seed_data["products"]["cheerios"].id)
         milk_id = str(seed_data["products"]["milk"].id)
