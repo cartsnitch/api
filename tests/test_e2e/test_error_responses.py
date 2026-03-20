@@ -121,11 +121,7 @@ class TestStoreConnectionErrors:
 
     async def test_connect_store_twice(self, client, seed_data):
         headers = seed_data["headers"]
-        first = await client.post(
-            "/me/stores/meijer/connect", json={}, headers=headers
-        )
+        first = await client.post("/me/stores/meijer/connect", json={}, headers=headers)
         assert first.status_code in (200, 201)
-        second = await client.post(
-            "/me/stores/meijer/connect", json={}, headers=headers
-        )
+        second = await client.post("/me/stores/meijer/connect", json={}, headers=headers)
         assert second.status_code == 409

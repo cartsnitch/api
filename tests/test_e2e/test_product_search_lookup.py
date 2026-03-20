@@ -64,22 +64,16 @@ class TestProductLookup:
         cheerios_id = str(seed_data["products"]["cheerios"].id)
         resp = await client.get(f"/products/{cheerios_id}", headers=seed_data["headers"])
         data = resp.json()
-        meijer_price = next(
-            p for p in data["prices_by_store"] if p["store_name"] == "Meijer"
-        )
+        meijer_price = next(p for p in data["prices_by_store"] if p["store_name"] == "Meijer")
         assert meijer_price["current_price"] == 4.79
 
     async def test_product_not_found(self, client, seed_data):
-        resp = await client.get(
-            f"/products/{ZERO_UUID}", headers=seed_data["headers"]
-        )
+        resp = await client.get(f"/products/{ZERO_UUID}", headers=seed_data["headers"])
         assert resp.status_code == 404
 
     async def test_product_price_history(self, client, seed_data):
         cheerios_id = str(seed_data["products"]["cheerios"].id)
-        resp = await client.get(
-            f"/products/{cheerios_id}/prices", headers=seed_data["headers"]
-        )
+        resp = await client.get(f"/products/{cheerios_id}/prices", headers=seed_data["headers"])
         assert resp.status_code == 200
         data = resp.json()
         assert len(data["data_points"]) >= 3  # At least the 3 Meijer observations

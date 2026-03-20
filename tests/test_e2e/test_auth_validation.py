@@ -81,9 +81,7 @@ class TestTokenValidation:
         assert resp.status_code == 401
 
     async def test_invalid_token_rejected(self, client, db_engine):
-        resp = await client.get(
-            "/auth/me", headers={"Authorization": "Bearer not-a-real-token"}
-        )
+        resp = await client.get("/auth/me", headers={"Authorization": "Bearer not-a-real-token"})
         assert resp.status_code == 401
 
     async def test_missing_auth_header(self, client, db_engine):
@@ -101,9 +99,7 @@ class TestTokenValidation:
             },
         )
         refresh_token = reg.json()["refresh_token"]
-        resp = await client.get(
-            "/auth/me", headers={"Authorization": f"Bearer {refresh_token}"}
-        )
+        resp = await client.get("/auth/me", headers={"Authorization": f"Bearer {refresh_token}"})
         assert resp.status_code == 401
 
     async def test_deleted_user_token_invalid(self, client, db_engine):
