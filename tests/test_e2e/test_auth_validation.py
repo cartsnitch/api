@@ -1,5 +1,7 @@
 """E2E: Auth and token validation flows."""
 
+import asyncio
+
 import pytest
 
 
@@ -32,6 +34,9 @@ class TestAuthRegistrationLogin:
         assert me.status_code == 200
         assert me.json()["email"] == "lifecycle@example.com"
         assert me.json()["display_name"] == "Lifecycle User"
+
+        # Sleep 1s so the new token has a different exp than the registration token
+        await asyncio.sleep(1)
 
         # Login with same credentials
         login = await client.post(

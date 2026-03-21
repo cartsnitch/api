@@ -1,5 +1,6 @@
 """Price routes: trends, increases, comparison."""
 
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -38,7 +39,7 @@ async def price_increases(
 
 @router.get("/comparison", response_model=list[PriceComparisonResponse])
 async def price_comparison(
-    product_ids: list[UUID] = Query(...),
+    product_ids: Annotated[list[UUID], Query()],
     user_id: UUID = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
