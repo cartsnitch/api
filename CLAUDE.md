@@ -23,7 +23,7 @@ CartSnitch is a self-hosted grocery price intelligence platform built as a polyr
 ### Architecture Decisions
 
 - **Polyrepo:** Each service has its own repo, Dockerfile, CI/CD pipeline.
-- **Shared DB:** One PostgreSQL cluster. This service reads from all tables for serving frontend queries. Models come from `cartsnitch-common`.
+- **Shared DB:** One PostgreSQL cluster. This service reads from all tables for serving frontend queries. The API has its own local SQLAlchemy models — it does NOT import from `cartsnitch-common`.
 - **Inter-service comms:** REST to internal services, Redis pub/sub for event subscriptions.
 - **Target scale:** 500–1,000 users initially.
 
@@ -42,7 +42,7 @@ The API Gateway is the single entry point for the frontend PWA and any external 
 
 - Python 3.12+
 - FastAPI (async)
-- SQLAlchemy 2.0 (via `cartsnitch-common`, read-heavy)
+- SQLAlchemy 2.0 (async, read-heavy)
 - Pydantic v2 (request/response validation)
 - python-jose or PyJWT (JWT auth)
 - passlib + bcrypt (password hashing)
